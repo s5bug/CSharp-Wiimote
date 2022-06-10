@@ -1,62 +1,57 @@
-﻿namespace Wiimote.Data;
+﻿using System.Collections.ObjectModel;
+
+namespace Wiimote.Data;
 
 public class StatusData : WiimoteData
 {
     /// Size: 4.  An array of what Player LEDs are on as reported by
     /// the Wii Remote.  This is only updated when the Wii Remote sends status reports.
-    public ReadOnlyArray<bool> led { get { return _led_readonly; } }
-    private ReadOnlyArray<bool> _led_readonly;
+    public ReadOnlyCollection<bool> LED => Array.AsReadOnly(_led);
     private bool[] _led;
 
     /// \brief True if the Wii Remote's batteries are low, as reported by the Wii Remote.
     ///        This is only updated when the Wii Remote sends status reports.
     /// \sa battery_level
-    public bool battery_low { get { return _battery_low; } }
-    private bool _battery_low;
+    public bool BatteryLow { get; private set; }
 
     /// True if an extension controller is connected, as reported by the Wii Remote.
     /// This is only updated when the Wii Remote sends status reports.
-    public bool ext_connected { get { return _ext_connected; } }
-    private bool _ext_connected;
+    public bool ExtConnected { get; private set; }
 
     /// True if the speaker is currently enabled, as reported by the Wii Remote.
     /// This is only updated when the Wii Remote sends status reports.
-    public bool speaker_enabled { get { return _speaker_enabled; } }
-    private bool _speaker_enabled;
+    public bool SpeakerEnabled { get; private set; }
 
     /// True if IR is currently enabled, as reported by the Wii Remote.
     /// This is only updated when the Wii Remote sends status reports.
-    public bool ir_enabled { get { return _ir_enabled; } }
-    private bool _ir_enabled;
+    public bool IrEnabled { get; private set; }
 
     /// \brief The current battery level, as reported by the Wii Remote.
     ///        This is only updated when the Wii Remote sends status reports.
     /// \sa battery_low
-    public byte battery_level { get { return _battery_level; } }
-    private byte _battery_level;
+    public byte BatteryLevel { get; private set; }
 
-    public StatusData(global::Wiimote.Wiimote Owner)
-        : base(Owner)
+    public StatusData(Wiimote owner)
+        : base(owner)
     {
         _led = new bool[4];
-        _led_readonly = new ReadOnlyArray<bool>(_led);
     }
 
     public override bool InterpretData(byte[] data)
     {
-        if (data == null || data.Length != 2) return false;
+        if (data.Length != 2) return false;
 
         byte flags = data[0];
-        _battery_low = (flags & 0x01) == 0x01;
-        _ext_connected = (flags & 0x02) == 0x02;
-        _speaker_enabled = (flags & 0x04) == 0x04;
-        _ir_enabled = (flags & 0x08) == 0x08;
+        BatteryLow = (flags & 0x01) == 0x01;
+        ExtConnected = (flags & 0x02) == 0x02;
+        SpeakerEnabled = (flags & 0x04) == 0x04;
+        IrEnabled = (flags & 0x08) == 0x08;
         _led[0] = (flags & 0x10) == 0x10;
         _led[1] = (flags & 0x20) == 0x20;
         _led[2] = (flags & 0x40) == 0x40;
         _led[3] = (flags & 0x80) == 0x80;
 
-        _battery_level = data[1];
+        BatteryLevel = data[1];
 
         return true;
     }

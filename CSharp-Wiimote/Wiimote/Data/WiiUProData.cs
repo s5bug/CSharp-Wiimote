@@ -1,6 +1,9 @@
+using System.Collections.ObjectModel;
+
 namespace Wiimote.Data;
 
-public class WiiUProData : WiimoteData {
+public class WiiUProData : WiimoteData
+{
 
 	/// Pro Controller left stick analog values.  This is a size-2 array [X,Y]
 	/// of RAW (unprocessed) stick data.  These values are in the range 803-3225
@@ -10,8 +13,7 @@ public class WiiUProData : WiimoteData {
 	///		  is to prompt the user to spin the control sticks in circles and record the min/max values.
 	///
 	/// \sa GetLeftStick01()
-	public ReadOnlyArray<ushort> lstick { get { return _lstick_readonly; } }
-	private ReadOnlyArray<ushort> _lstick_readonly;
+	public ReadOnlyCollection<ushort> LStick => Array.AsReadOnly(_lstick);
 	private ushort[] _lstick;
 
 	/// Pro Controller right stick analog values.  This is a size-2 array [X,Y]
@@ -22,94 +24,74 @@ public class WiiUProData : WiimoteData {
 	///		  is to prompt the user to spin the control sticks in circles and record the min/max values.
 	///
 	/// \sa GetRightStick01()
-	public ReadOnlyArray<ushort> rstick { get { return _rstick_readonly; } }
-	private ReadOnlyArray<ushort> _rstick_readonly;
+	public ReadOnlyCollection<ushort> RStick => Array.AsReadOnly(_rstick);
 	private ushort[] _rstick;
 
 	/// Button: Left Stick Button (push down switch)
-	public bool lstick_button { get { return _lstick_button; } }
-	private bool _lstick_button;
+	public bool LStickButton { get; private set; }
 
 	/// Button: Right Stick Button (push down switch)
-	public bool rstick_button { get { return _rstick_button; } }
-	private bool _rstick_button;
+	public bool RStickButton { get; private set; }
 
 	/// Button: A
-	public bool a { get { return _a; } }
-	private bool _a;
+	public bool A { get; private set; }
 
 	/// Button: B
-	public bool b { get { return _b; } }
-	private bool _b;
+	public bool B { get; private set; }
 
 	/// Button: X
-	public bool x { get { return _x; } }
-	private bool _x;
+	public bool X { get; private set; }
 
 	/// Button: Y
-	public bool y { get { return _y; } }
-	private bool _y;
+	public bool Y { get; private set; }
 
 	/// Button: + (plus)
-	public bool plus { get { return _plus; } }
-	private bool _plus;
+	public bool Plus { get; private set; }
 
 	/// Button: - (minus)
-	public bool minus { get { return _minus; } }
-	private bool _minus;
+	public bool Minus { get; private set; }
 
 	/// Button: home
-	public bool home { get { return _home; } }
-	private bool _home;
+	public bool Home { get; private set; }
 
 	/// Button:  L
-	public bool l { get { return _l; } }
-	private bool _l;
+	public bool L { get; private set; }
 
 	/// Button: R
-	public bool r { get { return _r; } }
-	private bool _r;
+	public bool R { get; private set; }
 
 	/// Button:  ZL
-	public bool zl { get { return _zl; } }
-	private bool _zl;
+	public bool ZL { get; private set; }
 
 	/// Button: ZR
-	public bool zr { get { return _zr; } }
-	private bool _zr;
+	public bool ZR { get; private set; }
 
 	/// Button: D-Pad Up
-	public bool dpad_up { get { return _dpad_up; } }
-	private bool _dpad_up;
+	public bool DPadUp { get; private set; }
 
 	/// Button: D-Pad Down
-	public bool dpad_down { get { return _dpad_down; } }
-	private bool _dpad_down;
+	public bool DPadDown { get; private set; }
 
 	/// Button: D-Pad Left
-	public bool dpad_left { get { return _dpad_left; } }
-	private bool _dpad_left;
+	public bool DPadLeft { get; private set; }
 
 	/// Button: D-Pad Right
-	public bool dpad_right { get { return _dpad_right; } }
-	private bool _dpad_right;
+	public bool DPadRight { get; private set; }
 
 	private ushort[] lmax = {3225,3291};
 	private ushort[] lmin = {803,843};
 	private ushort[] rmax = {3169,3315};
 	private ushort[] rmin = {852,810};
 
-	public WiiUProData(global::Wiimote.Wiimote owner) : base(owner) {
+	public WiiUProData(Wiimote owner) : base(owner) {
 		_lstick = new ushort[2];
-		_lstick_readonly = new ReadOnlyArray<ushort>(_lstick);
 
 		_rstick = new ushort[2];
-		_rstick_readonly = new ReadOnlyArray<ushort>(_rstick);
 	}
 
 	public override bool InterpretData(byte[] data)
 	{
-		if(data == null || data.Length < 11)
+		if(data.Length < 11)
 			return false;
 
 		_lstick[0] = (ushort)((ushort)data[0] | ((ushort)(data[1] & 0x0f) << 8));
@@ -118,25 +100,25 @@ public class WiiUProData : WiimoteData {
 		_rstick[0] = (ushort)((ushort)data[2] | ((ushort)(data[3] & 0x0f) << 8));
 		_rstick[1] = (ushort)((ushort)data[6] | ((ushort)(data[7] & 0x0f) << 8));
 
-		_dpad_right	= (data[8] & 0x80) != 0x80;
-		_dpad_down 	= (data[8] & 0x40) != 0x40;
-		_l 			= (data[8] & 0x20) != 0x20;
-		_minus	 	= (data[8] & 0x10) != 0x10;
-		_home	 	= (data[8] & 0x08) != 0x08;
-		_plus	 	= (data[8] & 0x04) != 0x04;
-		_r		 	= (data[8] & 0x02) != 0x02;
+		DPadRight	= (data[8] & 0x80) != 0x80;
+		DPadDown 	= (data[8] & 0x40) != 0x40;
+		L 			= (data[8] & 0x20) != 0x20;
+		Minus	 	= (data[8] & 0x10) != 0x10;
+		Home	 	= (data[8] & 0x08) != 0x08;
+		Plus	 	= (data[8] & 0x04) != 0x04;
+		R		 	= (data[8] & 0x02) != 0x02;
 
-		_zl 		= (data[9] & 0x80) != 0x80;
-		_b	 		= (data[9] & 0x40) != 0x40;
-		_y 			= (data[9] & 0x20) != 0x20;
-		_a	 		= (data[9] & 0x10) != 0x10;
-		_x		 	= (data[9] & 0x08) != 0x08;
-		_zr		 	= (data[9] & 0x04) != 0x04;
-		_dpad_left 	= (data[9] & 0x02) != 0x02;
-		_dpad_up 	= (data[9] & 0x01) != 0x01;
+		ZL 		= (data[9] & 0x80) != 0x80;
+		B	 		= (data[9] & 0x40) != 0x40;
+		Y 			= (data[9] & 0x20) != 0x20;
+		A	 		= (data[9] & 0x10) != 0x10;
+		X		 	= (data[9] & 0x08) != 0x08;
+		ZR		 	= (data[9] & 0x04) != 0x04;
+		DPadLeft 	= (data[9] & 0x02) != 0x02;
+		DPadUp 	= (data[9] & 0x01) != 0x01;
 
-		_lstick_button = (data[10] & 0x02) != 0x02;
-		_rstick_button = (data[10] & 0x01) != 0x01;
+		LStickButton = (data[10] & 0x02) != 0x02;
+		RStickButton = (data[10] & 0x01) != 0x01;
 
 		return true;
 	}
@@ -148,7 +130,7 @@ public class WiiUProData : WiimoteData {
 	public float[] GetLeftStick01() {
 		float[] ret = new float[2];
 		for(int x=0;x<2;x++) {
-			ret[x] = lstick[x];
+			ret[x] = _lstick[x];
 			ret[x] -= lmin[x];
 			ret[x] /= lmax[x]-lmin[x];
 		}
@@ -162,7 +144,7 @@ public class WiiUProData : WiimoteData {
 	public float[] GetRightStick01() {
 		float[] ret = new float[2];
 		for(int x=0;x<2;x++) {
-			ret[x] = rstick[x];
+			ret[x] = _rstick[x];
 			ret[x] -= rmin[x];
 			ret[x] /= rmax[x]-rmin[x];
 		}

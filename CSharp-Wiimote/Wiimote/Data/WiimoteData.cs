@@ -2,11 +2,11 @@
 
 public abstract class WiimoteData
 {
-    protected global::Wiimote.Wiimote Owner;
+    protected readonly Wiimote Owner;
 
-    public WiimoteData(global::Wiimote.Wiimote Owner)
+    public WiimoteData(Wiimote owner)
     {
-        this.Owner = Owner;
+        Owner = owner;
     }
 
     /// \brief Interprets raw byte data reported by the Wii Remote.  The format of the actual bytes

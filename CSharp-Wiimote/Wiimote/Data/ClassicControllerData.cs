@@ -1,14 +1,16 @@
+using System.Collections.ObjectModel;
+
 namespace Wiimote.Data;
 
-public class ClassicControllerData : WiimoteData {
+public class ClassicControllerData : WiimoteData
+{
 
 	/// Classic Controller left stick analog values.  This is a size-2 array [X,Y]
 	/// of RAW (unprocessed) stick data.  These values are in the range 0-63
 	/// in both X and Y.
 	///
 	/// \sa GetLeftStick01()
-	public ReadOnlyArray<byte> lstick { get { return _lstick_readonly; } }
-	private ReadOnlyArray<byte> _lstick_readonly;
+	public ReadOnlyCollection<byte> LStick => Array.AsReadOnly(_lstick);
 	private byte[] _lstick;
 
 	/// Classic Controller right stick analog values.  This is a size-2 array [X,Y]
@@ -19,96 +21,76 @@ public class ClassicControllerData : WiimoteData {
 	///       stick (the left stick is in the range 0-63 while the right is 0-31).
 	///
 	/// \sa GetRightStick01()
-	public ReadOnlyArray<byte> rstick { get { return _rstick_readonly; } }
-	private ReadOnlyArray<byte> _rstick_readonly;
+	public ReadOnlyCollection<byte> RStick => Array.AsReadOnly(_rstick);
 	private byte[] _rstick;
 
 	/// Classic Controller left trigger analog value.  This is RAW (unprocessed) analog
 	/// data.  It is in the range 0-31 (with 0 being unpressed and 31 being fully pressed).
 	///
 	/// \sa rtrigger_range, ltrigger_switch, ltrigger_switch
-	public byte ltrigger_range { get { return _ltrigger_range; } }
-	private byte _ltrigger_range;
+	public byte LTriggerRange { get; private set; }
 
 	/// Classic Controller right trigger analog value.  This is RAW (unprocessed) analog
 	/// data.  It is in the range 0-31 (with 0 being unpressed and 31 being fully pressed).
 	///
 	/// \sa ltrigger_range, rtrigger_switch, rtrigger_switch
-	public byte rtrigger_range { get { return _rtrigger_range; } }
-	private byte _rtrigger_range;
+	public byte RTriggerRange { get; private set; }
 
 	/// Button: Left trigger (bottom out switch)
 	/// \sa rtrigger_switch, rtrigger_range, ltrigger_range
-	public bool ltrigger_switch { get { return _ltrigger_switch; } }
-	private bool _ltrigger_switch;
+	public bool LTriggerSwitch { get; private set; }
 
 	/// Button: Right trigger (button out switch)
 	/// \sa ltrigger_switch, ltrigger_range, rtrigger_range
-	public bool rtrigger_switch { get { return _rtrigger_switch; } }
-	private bool _rtrigger_switch;
+	public bool RTriggerSwitch { get; private set; }
 
 	/// Button: A
-	public bool a { get { return _a; } }
-	private bool _a;
+	public bool A { get; private set; }
 
 	/// Button: B
-	public bool b { get { return _b; } }
-	private bool _b;
+	public bool B { get; private set; }
 
 	/// Button: X
-	public bool x { get { return _x; } }
-	private bool _x;
+	public bool X { get; private set; }
 
 	/// Button: Y
-	public bool y { get { return _y; } }
-	private bool _y;
+	public bool Y { get; private set; }
 
 	/// Button: + (plus)
-	public bool plus { get { return _plus; } }
-	private bool _plus;
+	public bool Plus { get; private set; }
 
 	/// Button: - (minus)
-	public bool minus { get { return _minus; } }
-	private bool _minus;
+	public bool Minus { get; private set; }
 
 	/// Button: home
-	public bool home { get { return _home; } }
-	private bool _home;
+	public bool Home { get; private set; }
 
 	/// Button:  ZL
-	public bool zl { get { return _zl; } }
-	private bool _zl;
+	public bool ZL { get; private set; }
 
 	/// Button: ZR
-	public bool zr { get { return _zr; } }
-	private bool _zr;
+	public bool ZR { get; private set; }
 
 	/// Button: D-Pad Up
-	public bool dpad_up { get { return _dpad_up; } }
-	private bool _dpad_up;
+	public bool DPadUp { get; private set; }
 
 	/// Button: D-Pad Down
-	public bool dpad_down { get { return _dpad_down; } }
-	private bool _dpad_down;
+	public bool DPadDown { get; private set; }
 
 	/// Button: D-Pad Left
-	public bool dpad_left { get { return _dpad_left; } }
-	private bool _dpad_left;
+	public bool DPadLeft { get; private set; }
 
 	/// Button: D-Pad Right
-	public bool dpad_right { get { return _dpad_right; } }
-	private bool _dpad_right;
+	public bool DPadRight { get; private set; }
 
 	public ClassicControllerData(global::Wiimote.Wiimote owner) : base(owner) {
 		_lstick = new byte[2];
-		_lstick_readonly = new ReadOnlyArray<byte>(_lstick);
 
 		_rstick = new byte[2];
-		_rstick_readonly = new ReadOnlyArray<byte>(_rstick);
 	}
 
 	public override bool InterpretData(byte[] data) {
-		if(data == null || data.Length < 6)
+		if(data.Length < 6)
 			return false;
 
 		_lstick[0] = (byte)(data[0] & 0x3f);
@@ -119,29 +101,29 @@ public class ClassicControllerData : WiimoteData {
 		                    ((data[2] & 0x80) >> 7));
 		_rstick[1] = (byte)(data[2] & 0x1f);
 
-		_ltrigger_range = (byte)(((data[2] & 0x60) >> 2) |
+		LTriggerRange = (byte)(((data[2] & 0x60) >> 2) |
 		                         ((data[3] & 0xe0) >> 5));
 
-		_rtrigger_range = (byte)(data[3] & 0x1f);
+		RTriggerRange = (byte)(data[3] & 0x1f);
 
 		// Bit is zero when pressed, one when up.  This is really weird so I reverse
 		// the bit with !=
-		_dpad_right 	 = (data[4] & 0x80) != 0x80;
-		_dpad_down  	 = (data[4] & 0x40) != 0x40;
-		_ltrigger_switch = (data[4] & 0x20) != 0x20;
-		_minus 			 = (data[4] & 0x10) != 0x10;
-		_home 			 = (data[4] & 0x08) != 0x08;
-		_plus			 = (data[4] & 0x04) != 0x04;
-		_rtrigger_switch = (data[4] & 0x02) != 0x02;
+		DPadRight 	 = (data[4] & 0x80) != 0x80;
+		DPadDown  	 = (data[4] & 0x40) != 0x40;
+		LTriggerSwitch = (data[4] & 0x20) != 0x20;
+		Minus 			 = (data[4] & 0x10) != 0x10;
+		Home 			 = (data[4] & 0x08) != 0x08;
+		Plus			 = (data[4] & 0x04) != 0x04;
+		RTriggerSwitch = (data[4] & 0x02) != 0x02;
 
-		_zl 			 = (data[5] & 0x80) != 0x80;
-		_b 				 = (data[5] & 0x40) != 0x40;
-		_y 				 = (data[5] & 0x20) != 0x20;
-		_a 				 = (data[5] & 0x10) != 0x10;
-		_x 				 = (data[5] & 0x08) != 0x08;
-		_zr 			 = (data[5] & 0x04) != 0x04;
-		_dpad_left		 = (data[5] & 0x02) != 0x02;
-		_dpad_up		 = (data[5] & 0x01) != 0x01;
+		ZL 			 = (data[5] & 0x80) != 0x80;
+		B 				 = (data[5] & 0x40) != 0x40;
+		Y 				 = (data[5] & 0x20) != 0x20;
+		A 				 = (data[5] & 0x10) != 0x10;
+		X 				 = (data[5] & 0x08) != 0x08;
+		ZR 			 = (data[5] & 0x04) != 0x04;
+		DPadLeft		 = (data[5] & 0x02) != 0x02;
+		DPadUp		 = (data[5] & 0x01) != 0x01;
 
 		return true;
 	}
@@ -153,7 +135,7 @@ public class ClassicControllerData : WiimoteData {
 	public float[] GetLeftStick01() {
 		float[] ret = new float[2];
 		for(int x=0;x<2;x++) {
-			ret[x] = lstick[x];
+			ret[x] = LStick[x];
 			ret[x] /= 63;
 		}
 		return ret;
@@ -169,7 +151,7 @@ public class ClassicControllerData : WiimoteData {
 	public float[] GetRightStick01() {
 		float[] ret = new float[2];
 		for(int x=0;x<2;x++) {
-			ret[x] = rstick[x];
+			ret[x] = RStick[x];
 			ret[x] /= 31;
 		}
 		return ret;

@@ -1,6 +1,8 @@
-﻿namespace Wiimote.Data;
+﻿using System.Collections.ObjectModel;
 
-public class IRData : WiimoteData
+namespace Wiimote.Data;
+
+public class IrData : WiimoteData
 {
     /// \brief Size: 4x3.  Current Wii Remote RAW IR data.  Wii Remote IR data can
     ///        detect up to four IR dots.  Data = -1 if it is inapplicable (for
@@ -14,18 +16,16 @@ public class IRData : WiimoteData
     /// |Range: |  0 - 1023  |  0 - 767   | 0 - 15 | 0 - 127 | 0 - 127 | 0 - 127 | 0 - 127 |  0 - 256  |
     /// |Index: |     0      |      1     |   2    |    3    |    4    |    5    |    6    |     7     |
     ///
-    /// \code int[dot index, x (0) / y (1) / size (2) / xmin (3) / ymin (4) / xmax (5) / ymax (6) / intensity (7)] \endcode
+    /// \code int[(dot index * 8) + {x (0) / y (1) / size (2) / xmin (3) / ymin (4) / xmax (5) / ymax (6) / intensity (7)}] \endcode
     /// 
     /// \sa IRDataType, Wiimote::SetupIRCamera(IRDataType)
-    public ReadOnlyMatrix<int> ir { get { return _ir_readonly; } }
-    private ReadOnlyMatrix<int> _ir_readonly;
-    private int[,] _ir;
+    public ReadOnlyCollection<int> Ir => Array.AsReadOnly(_ir);
+    private int[] _ir;
 
-    public IRData(global::Wiimote.Wiimote Owner)
-        : base(Owner)
+    public IrData(Wiimote owner)
+        : base(owner)
     {
-        _ir = new int[4, 8];
-        _ir_readonly = new ReadOnlyMatrix<int>(_ir);
+        _ir = new int[32];
     }
 
     public override bool InterpretData(byte[] data)
@@ -67,7 +67,7 @@ public class IRData : WiimoteData
             res = InterpretDataInterleaved_Subset(subset);
 
             for (int y = 0; y < 8; y++)
-                _ir[x, y] = res[y];
+                _ir[(x * 8) + y] = res[y];
         }
 
         return true;
@@ -101,13 +101,13 @@ public class IRData : WiimoteData
         int[,] subset = InterperetIRData10_Subset(half);
         for (int x = 0; x < 2; x++)
         for (int y = 0; y < 8; y++)
-            _ir[x, y] = subset[x, y];
+            _ir[(x * 8) + y] = subset[x, y];
 
         for (int x = 0; x < 5; x++) half[x] = data[x + 5];
         subset = InterperetIRData10_Subset(half);
         for (int x = 0; x < 2; x++)
         for (int y = 0; y < 8; y++)
-            _ir[x + 2, y] = subset[x, y];
+            _ir[((x + 2) * 8) + y] = subset[x, y];
     }
 
     private int[,] InterperetIRData10_Subset(byte[] data)
@@ -151,7 +151,7 @@ public class IRData : WiimoteData
             int[] calc = InterpretIRData12_Subset(subset);
 
             for (int y = 0; y < 8; y++)
-                _ir[x, y] = calc[y];
+                _ir[(x * 8) + y] = calc[y];
         }
     }
 
@@ -185,9 +185,9 @@ public class IRData : WiimoteData
 
         float[] accel = Owner.Accel.GetCalibratedAccelData();
 
-        float rotation = Mathf.Atan2(accel[2], accel[0]) - (float)(Mathf.PI / 2.0f);
-        float cos = Mathf.Cos(rotation);
-        float sin = Mathf.Sin(rotation);
+        float rotation = MathF.Atan2(accel[2], accel[0]) - (MathF.PI / 2.0f);
+        float cos = MathF.Cos(rotation);
+        float sin = MathF.Sin(rotation);
         ret[0] = midpoint[0] * cos + midpoint[1] * sin;
         ret[1] = -midpoint[0] * sin + midpoint[1] * cos;
         ret[0] += 0.5f;
@@ -231,12 +231,12 @@ public class IRData : WiimoteData
         // We do this because the Wii Remote reports "consistent" IR dot indices - that is, it tracks the IR dots and doesn't change their index in the IR report.
         // This way we can rule out extraneous dots that pop in and out randomly as they aren't being tracked.
         for (int x = 0; x < 2; x++) {
-            if (SensorBarIndices[x] == -1 || _ir[SensorBarIndices[x], 0] == -1) {
+            if (SensorBarIndices[x] == -1 || _ir[(SensorBarIndices[x] * 8) + 0] == -1) {
                 SensorBarIndices[x] = -1;
                 for (int y = 0; y < 4; y++) {
                     if (SensorBarIndices[(x + 1) % 2] == y) continue; // If the other sensor bar index is this one, ignore it.
 
-                    if (_ir[y, 0] != -1) { // If this index is valid, use it.
+                    if (_ir[(y * 8) + 0] != -1) { // If this index is valid, use it.
                         SensorBarIndices[x] = y;
                         y = 4; // end loop
                     }
@@ -262,7 +262,7 @@ public class IRData : WiimoteData
             {
                 for (int y = 0; y < 2; y++)
                 {
-                    ret[x, y] = _ir[SensorBarIndices[x], y];
+                    ret[x, y] = _ir[(SensorBarIndices[x] * 8) + y];
                 }
             }
 
@@ -276,8 +276,8 @@ public class IRData : WiimoteData
         } else if (predict && SensorBarIndices[0] != -1) // We have enought data to predict (1 dot) and predicting was requested
         {
             float[,] ret = new float[2, 3];
-            ret[0, 0] = _ir[SensorBarIndices[0], 0];
-            ret[0, 1] = _ir[SensorBarIndices[0], 1];
+            ret[0, 0] = _ir[(SensorBarIndices[0] * 8) + 0];
+            ret[0, 1] = _ir[(SensorBarIndices[0] * 8) + 1];
             ret[0, 2] = SensorBarIndices[0];
 
             ret[1, 0] = ret[0, 0] + LastIRSeparation[0];
