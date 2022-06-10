@@ -6,7 +6,8 @@ public class StatusData : WiimoteData
 {
     /// Size: 4.  An array of what Player LEDs are on as reported by
     /// the Wii Remote.  This is only updated when the Wii Remote sends status reports.
-    public ReadOnlyCollection<bool> LED => Array.AsReadOnly(_led);
+    public ReadOnlyCollection<bool> Led => Array.AsReadOnly(_led);
+
     private bool[] _led;
 
     /// \brief True if the Wii Remote's batteries are low, as reported by the Wii Remote.

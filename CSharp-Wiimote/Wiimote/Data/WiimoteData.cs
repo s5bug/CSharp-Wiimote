@@ -14,5 +14,4 @@ public abstract class WiimoteData
     ///        of data being passed.
     /// \sa Wiimote::ReadWiimoteData()
     public abstract bool InterpretData(byte[] data);
-        
 }

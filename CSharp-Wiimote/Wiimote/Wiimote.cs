@@ -15,17 +15,19 @@ public class Wiimote
     public bool RumbleOn = false;
 
     /// Accelerometer data component
-    public AccelData     Accel { get; }
+    public AccelData Accel { get; }
 
     /// If a Nunchuck is currently connected to the Wii Remote's extension port,
     /// this contains all relevant Nunchuck controller data as it is reported by
     /// the Wiimote.  If no Nunchuck is connected, this is \c null.
     ///
     /// \sa current_ext
-    public NunchuckData? Nunchuck {
-        get {
-            if(CurrentExt == ExtensionController.Nunchuck)
-                return (NunchuckData)_extension!;
+    public NunchuckData? Nunchuck
+    {
+        get
+        {
+            if (CurrentExt == ExtensionController.Nunchuck)
+                return (NunchuckData) _extension!;
             return null;
         }
     }
@@ -35,10 +37,12 @@ public class Wiimote
     /// the Wiimote.  If no Classic Controller is connected, this is \c null.
     ///
     /// \sa current_ext
-    public ClassicControllerData? ClassicController {
-        get {
-            if(CurrentExt == ExtensionController.Classic)
-                return (ClassicControllerData)_extension!;
+    public ClassicControllerData? ClassicController
+    {
+        get
+        {
+            if (CurrentExt == ExtensionController.Classic)
+                return (ClassicControllerData) _extension!;
             return null;
         }
     }
@@ -49,10 +53,12 @@ public class Wiimote
     /// WMP is connected, this is \c null.
     ///
     /// \sa current_ext, wmp_attached, ActivateWiiMotionPlus()
-    public MotionPlusData? MotionPlus {
-        get {
-            if(CurrentExt == ExtensionController.MotionPlus)
-                return (MotionPlusData)_extension!;
+    public MotionPlusData? MotionPlus
+    {
+        get
+        {
+            if (CurrentExt == ExtensionController.MotionPlus)
+                return (MotionPlusData) _extension!;
             return null;
         }
     }
@@ -62,10 +68,12 @@ public class Wiimote
     /// the Controller.  If this Wiimote is not a Wii U Pro Controller, this is \c null.
     ///
     /// \sa current_ext
-    public WiiUProData? WiiUPro {
-        get {
-            if(CurrentExt == ExtensionController.WiiUPro)
-                return (WiiUProData)_extension!;
+    public WiiUProData? WiiUPro
+    {
+        get
+        {
+            if (CurrentExt == ExtensionController.WiiUPro)
+                return (WiiUProData) _extension!;
             return null;
         }
     }
@@ -75,10 +83,12 @@ public class Wiimote
     /// the Controller.  If this Wiimote is not a Guitar Controller, this is \c null.
     ///
     /// \sa current_ext
-    public GuitarData? Guitar {
-        get {
-            if(CurrentExt == ExtensionController.Guitar)
-                return (GuitarData)_extension!;
+    public GuitarData? Guitar
+    {
+        get
+        {
+            if (CurrentExt == ExtensionController.Guitar)
+                return (GuitarData) _extension!;
             return null;
         }
     }
@@ -86,25 +96,25 @@ public class Wiimote
     private WiimoteData? _extension;
 
     /// Button data component.
-    public ButtonData    Button { get; }
+    public ButtonData Button { get; }
 
     /// IR data component.
-    public IrData        Ir { get; }
+    public IrData Ir { get; }
 
     /// Status info data component.
-    public StatusData    Status { get; }
+    public StatusData Status { get; }
 
     /// The RAW (unprocessesed) extension data reported by the Wii Remote.  This could
     /// be used for debugging new / undocumented extension controllers.
     public ReadOnlyCollection<byte>? RawExtension { get; private set; }
-    
+
     public WiimoteType Type { get; private set; }
-    
+
     /// <summary>
     /// The serial number of the Wiimote device
     /// </summary>
     public string Serial { get; }
-    
+
     /// <summary>
     /// The HID device handle, used to send and receive commands
     /// </summary>
@@ -133,13 +143,13 @@ public class Wiimote
 
     public Wiimote(WiimoteType type, string serial, IDevice device)
     {
-        Type    = type;
+        Type = type;
         Serial = serial;
         Device = device;
 
-        Accel  = new AccelData(this);
+        Accel = new AccelData(this);
         Button = new ButtonData(this);
-        Ir     = new IrData(this);
+        Ir = new IrData(this);
         Status = new StatusData(this);
         _extension = null;
         _expectingWiiMotionPlusSwitch = false;
@@ -147,7 +157,7 @@ public class Wiimote
         //RequestIdentifyWiiMotionPlus(); // why not?
     }
 
-    private static byte[] ID_InactiveMotionPlus  = new byte[] {0x00, 0x00, 0xA6, 0x20, 0x00, 0x05};
+    private static byte[] ID_InactiveMotionPlus = new byte[] {0x00, 0x00, 0xA6, 0x20, 0x00, 0x05};
 
     private void RespondIdentifyWiiMotionPlus(byte[] data)
     {
@@ -157,8 +167,9 @@ public class Wiimote
             return;
         }
 
-        if (data[0] == 0x01)                    // This is a weird inconsistency with some Wii Remote Pluses.  They don't have the -TR suffix
-            Type = WiimoteType.WiimotePlus;    // or a different PID as an identifier.  Instead they have a different WMP extension identifier.
+        if (data[0] == 0x01) // This is a weird inconsistency with some Wii Remote Pluses.  They don't have the -TR suffix
+            Type = WiimoteType
+                .WiimotePlus; // or a different PID as an identifier.  Instead they have a different WMP extension identifier.
         // It occurs on some of the oldest Wii Remote Pluses available (pre-2012).
 
         for (int x = 0; x < data.Length; x++)
@@ -174,18 +185,19 @@ public class Wiimote
                 return;
             }
         }
+
         WmpAttached = true;
     }
 
-    private const long IdActiveMotionPlus          = 0x0000A4200405;
+    private const long IdActiveMotionPlus = 0x0000A4200405;
     private const long IdActiveMotionPlusNunchuck = 0x0000A4200505;
-    private const long IdActiveMotionPlusClassic  = 0x0000A4200705;
-    private const long IdNunchuck                  = 0x0000A4200000;
-    private const long IdNunchuck2                 = 0xFF00A4200000;
-    private const long IdClassic                   = 0x0000A4200101;
-    private const long IdClassicPro                = 0x0100A4200101;
-    private const long IdWiiUPro                   = 0x0000A4200120;
-    private const long IdGuitar                    = 0x0000A4200103;
+    private const long IdActiveMotionPlusClassic = 0x0000A4200705;
+    private const long IdNunchuck = 0x0000A4200000;
+    private const long IdNunchuck2 = 0xFF00A4200000;
+    private const long IdClassic = 0x0000A4200101;
+    private const long IdClassicPro = 0x0100A4200101;
+    private const long IdWiiUPro = 0x0000A4200120;
+    private const long IdGuitar = 0x0000A4200103;
 
 
     private void RespondIdentifyExtension(byte[] data)
@@ -194,14 +206,14 @@ public class Wiimote
             return;
 
         byte[] resized = new byte[8];
-        for (int x = 0; x < 6; x++) resized[x] = data[5-x];
+        for (int x = 0; x < 6; x++) resized[x] = data[5 - x];
         long val = BitConverter.ToInt64(resized, 0);
 
         // Disregard bytes 0 and 5 - see RespondIdentifyWiiMotionPlus()
         if ((val | 0xff000000ff00) == (IdActiveMotionPlus | 0xff000000ff00))
         {
             CurrentExt = ExtensionController.MotionPlus;
-            if(_extension == null || _extension.GetType() != typeof(MotionPlusData))
+            if (_extension == null || _extension.GetType() != typeof(MotionPlusData))
                 _extension = new MotionPlusData(this);
         }
         else if (val == IdActiveMotionPlusNunchuck)
@@ -272,25 +284,25 @@ public class Wiimote
         // 2. Enable IR Camera 2 (Send 0x04 to Output Report 0x1a)
         await SendIrCameraEnable(true);
         // 3. Write 0x08 to register 0xb00030
-        await SendRegisterWriteRequest(RegisterType.Control, 0xb00030, new byte[] { 0x08 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xb00030, new byte[] {0x08});
         // 4. Write Sensitivity Block 1 to registers at 0xb00000
         // Wii sensitivity level 3:
         // 02 00 00 71 01 00 aa 00 64
         // High Sensitivity:
         // 00 00 00 00 00 00 90 00 41
         await SendRegisterWriteRequest(RegisterType.Control, 0xb00000,
-            new byte[] { 0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0xaa, 0x00, 0x64 });
+            new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0xaa, 0x00, 0x64});
         //new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x00, 0x41});
         // 5. Write Sensitivity Block 2 to registers at 0xb0001a
         // Wii sensitivity level 3: 
         // 63 03
         // High Sensitivity:
         // 40 00
-        await SendRegisterWriteRequest(RegisterType.Control, 0xb0001a, new byte[] { 0x63, 0x03 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xb0001a, new byte[] {0x63, 0x03});
         // 6. Write Mode Number to register 0xb00033
-        await SendRegisterWriteRequest(RegisterType.Control, 0xb00033, new byte[] { (byte)type });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xb00033, new byte[] {(byte) type});
         // 7. Write 0x08 to register 0xb00030 (again)
-        await SendRegisterWriteRequest(RegisterType.Control, 0xb00030, new byte[] { 0x08 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xb00030, new byte[] {0x08});
 
         switch (type)
         {
@@ -342,10 +354,10 @@ public class Wiimote
     public async Task<bool> ActivateWiiMotionPlus()
     {
         // if (!WmpAttached)
-            // Debug.LogWarning("There is a request to activate the Wii Motion Plus even though it has not been confirmed to exist!  Trying anyway.");
+        // Debug.LogWarning("There is a request to activate the Wii Motion Plus even though it has not been confirmed to exist!  Trying anyway.");
 
         // Initialize the Wii Motion Plus by writing 0x55 to register 0xA600F0
-        await SendRegisterWriteRequest(RegisterType.Control, 0xA600F0, new byte[] { 0x55 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xA600F0, new byte[] {0x55});
 
         // Activate the Wii Motion Plus as the active extension by writing 0x04 to register 0xA600FE
         // This does 3 things:
@@ -353,7 +365,7 @@ public class Wiimote
         //    plugged in - IF there is no extension plugged into the passthrough port.
         // 2. The standard extension identifier at 0xA400FA now reads 00 00 A4 20 04 05
         // 3. Extension reports now contain Wii Motion Plus data.
-        await SendRegisterWriteRequest(RegisterType.Control, 0xA600FE, new byte[] { 0x04 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xA600FE, new byte[] {0x04});
 
         CurrentExt = ExtensionController.MotionPlus;
         if (_extension == null || _extension.GetType() != typeof(MotionPlusData))
@@ -366,8 +378,8 @@ public class Wiimote
     public async Task<bool> DeactivateWiiMotionPlus()
     {
         // if (CurrentExt != ExtensionController.MotionPlus && CurrentExt != ExtensionController.MotionPlusClassic && CurrentExt != ExtensionController.MotionPlusNunchuck)
-            // Debug.LogWarning("There is a request to deactivate the Wii Motion Plus even though it has not been activated!  Trying anyway.");
-        uint res = await SendRegisterWriteRequest(RegisterType.Control, 0xA400F0, new byte[] { 0x55 });
+        // Debug.LogWarning("There is a request to deactivate the Wii Motion Plus even though it has not been activated!  Trying anyway.");
+        uint res = await SendRegisterWriteRequest(RegisterType.Control, 0xA400F0, new byte[] {0x55});
         return res > 0;
     }
 
@@ -379,19 +391,20 @@ public class Wiimote
     private async Task<bool> ActivateExtension()
     {
         // if (!Status.ExtConnected)
-            // Debug.LogWarning("There is a request to activate an Extension controller even though it has not been confirmed to exist!  Trying anyway.");
+        // Debug.LogWarning("There is a request to activate an Extension controller even though it has not been confirmed to exist!  Trying anyway.");
 
         // 1. Initialize the Extension by writing 0x55 to register 0xA400F0
-        await SendRegisterWriteRequest(RegisterType.Control, 0xA400F0, new byte[] { 0x55 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xA400F0, new byte[] {0x55});
 
         // 2. Activate the Extension by writing 0x00 to register 0xA400FB
-        await SendRegisterWriteRequest(RegisterType.Control, 0xA400FB, new byte[] { 0x00 });
+        await SendRegisterWriteRequest(RegisterType.Control, 0xA400FB, new byte[] {0x00});
         return true;
     }
 
     #endregion
 
     #region Write
+
     /// \brief Sends a generic block of data to the Wii Remote using the specified Output Report.
     /// \param type The output report type you would like to send
     /// \param data The raw data you would like to send using the specified \c type.
@@ -404,7 +417,7 @@ public class Wiimote
     public async Task<uint> SendWithType(OutputDataType type, byte[] data)
     {
         byte[] final = new byte[data.Length + 1];
-        final[0] = (byte)type;
+        final[0] = (byte) type;
 
         for (int x = 0; x < data.Length; x++)
             final[x + 1] = data[x];
@@ -431,7 +444,7 @@ public class Wiimote
         if (led3) mask |= 0x40;
         if (led4) mask |= 0x80;
 
-        return await SendWithType(OutputDataType.Led, new byte[] { mask });
+        return await SendWithType(OutputDataType.Led, new byte[] {mask});
     }
 
     /// \brief Sets the Data Reporting mode of the Wii Remote.
@@ -442,7 +455,8 @@ public class Wiimote
     /// \sa SendWithType(OutputDataType, byte[])
     public async Task<uint> SendDataReportMode(InputDataType mode)
     {
-        if (mode is InputDataType.StatusInfo or InputDataType.ReadMemoryRegisters or InputDataType.AcknowledgeOutputReport)
+        if (mode is InputDataType.StatusInfo or InputDataType.ReadMemoryRegisters
+            or InputDataType.AcknowledgeOutputReport)
         {
             // Debug.LogError("Passed " + mode.ToString() + " to SendDataReportMode!");
             throw new ArgumentException("Passed " + mode + " to SendDataReportMode!");
@@ -452,12 +466,12 @@ public class Wiimote
 
         _expectingSecondInterleavedPacket = false;
 
-        return await SendWithType(OutputDataType.DataReportMode, new byte[] { 0x00, (byte)mode });
+        return await SendWithType(OutputDataType.DataReportMode, new byte[] {0x00, (byte) mode});
     }
 
     private async Task<uint> SendIrCameraEnable(bool enabled)
     {
-        byte[] mask = { (byte)(enabled ? 0x04 : 0x00) };
+        byte[] mask = {(byte) (enabled ? 0x04 : 0x00)};
 
         uint first = await SendWithType(OutputDataType.IrCameraEnable, mask);
 
@@ -468,14 +482,14 @@ public class Wiimote
 
     private async Task<uint> SendSpeakerEnabled(bool enabled)
     {
-        byte[] mask = { (byte)(enabled ? 0x04 : 0x00) };
+        byte[] mask = {(byte) (enabled ? 0x04 : 0x00)};
 
         return await SendWithType(OutputDataType.SpeakerEnable, mask);
     }
 
     private async Task<uint> SendSpeakerMuted(bool muted)
     {
-        byte[] mask = { (byte)(muted ? 0x04 : 0x00) };
+        byte[] mask = {(byte) (muted ? 0x04 : 0x00)};
 
         return await SendWithType(OutputDataType.SpeakerMute, mask);
     }
@@ -488,7 +502,7 @@ public class Wiimote
     public async Task<uint> SendStatusInfoRequest()
     {
         _expectingStatusReport = true;
-        return await SendWithType(OutputDataType.StatusInfoRequest, new byte[] { 0x00 });
+        return await SendWithType(OutputDataType.StatusInfoRequest, new byte[] {0x00});
     }
 
     /// \brief Requests the Wii Remote to report data from its internal registers.
@@ -518,12 +532,15 @@ public class Wiimote
 
         _currentReadData = new RegisterReadData(offset, size, responder);
 
-        byte addressSelect = (byte)type;
+        byte addressSelect = (byte) type;
         byte[] offsetArr = IntToBigEndian(offset, 3);
         byte[] sizeArr = IntToBigEndian(size, 2);
 
-        byte[] total = { addressSelect, offsetArr[0], offsetArr[1], offsetArr[2], 
-            sizeArr[0], sizeArr[1] };
+        byte[] total =
+        {
+            addressSelect, offsetArr[0], offsetArr[1], offsetArr[2],
+            sizeArr[0], sizeArr[1]
+        };
 
         return await SendWithType(OutputDataType.ReadMemoryRegisters, total);
     }
@@ -545,20 +562,22 @@ public class Wiimote
     {
         if (data.Length > 16) throw new ArgumentException("Length is greater than 16");
 
-        byte addressSelect = (byte)type;
+        byte addressSelect = (byte) type;
         byte[] offsetArr = IntToBigEndian(offset, 3);
 
         byte[] total = new byte[21];
         total[0] = addressSelect;
         for (int x = 0; x < 3; x++) total[x + 1] = offsetArr[x];
-        total[4] = (byte)data.Length;
+        total[4] = (byte) data.Length;
         for (int x = 0; x < data.Length; x++) total[x + 5] = data[x];
 
         return await SendWithType(OutputDataType.WriteMemoryRegisters, total);
     }
+
     #endregion
 
     #region Read
+
     /// \brief Reads and interprets data reported by the Wii Remote.
     /// \return On success, > 0, &lt; 0 on failure, 0 if nothing has been recieved.
     /// 
@@ -594,7 +613,7 @@ public class Wiimote
         switch ((InputDataType) result.Data[0]) // buf[0] is the output ID byte
         {
             case InputDataType.StatusInfo: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 byte flags = data[2];
                 byte batteryLevel = data[5];
 
@@ -602,27 +621,29 @@ public class Wiimote
 
                 bool oldExtConnected = Status.ExtConnected;
 
-                byte[] total = new byte[] { flags, batteryLevel };
+                byte[] total = new byte[] {flags, batteryLevel};
                 Status.InterpretData(total);
 
                 if (_expectingStatusReport)
                 {
                     _expectingStatusReport = false;
                 }
-                else                                        // We haven't requested any data report type, meaning a controller has connected.
+                else // We haven't requested any data report type, meaning a controller has connected.
                 {
-                    await SendDataReportMode(_lastReportType);   // If we don't update the data report mode, no updates will be sent
+                    await SendDataReportMode(
+                        _lastReportType); // If we don't update the data report mode, no updates will be sent
                 }
 
                 if (Status.ExtConnected != oldExtConnected && Type != WiimoteType.ProController)
                 {
-                    if (Status.ExtConnected)                // The Wii Remote doesn't allow reading from the extension identifier
-                    {                                        // when nothing is connected.
+                    if (Status.ExtConnected) // The Wii Remote doesn't allow reading from the extension identifier
+                    {
+                        // when nothing is connected.
                         // Debug.Log("An extension has been connected.");
                         if (CurrentExt != ExtensionController.MotionPlus)
                         {
                             await ActivateExtension();
-                            await RequestIdentifyExtension();         // Identify what extension was connected.
+                            await RequestIdentifyExtension(); // Identify what extension was connected.
                         }
                         else
                             _expectingWiiMotionPlusSwitch = false;
@@ -634,9 +655,10 @@ public class Wiimote
                         // Debug.Log("An extension has been disconnected.");
                     }
                 }
+
                 break;
             case InputDataType.ReadMemoryRegisters: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
                 if (_currentReadData == null)
@@ -645,23 +667,24 @@ public class Wiimote
                     return result.BytesTransferred;
                 }
 
-                byte size = (byte)((data[2] >> 4) + 0x01);
-                byte error = (byte)(data[2] & 0x0f);
+                byte size = (byte) ((data[2] >> 4) + 0x01);
+                byte error = (byte) (data[2] & 0x0f);
                 // Error 0x07 means reading from a write-only register
                 // Offset 0xa600fa is for the Wii Motion Plus.  This error code can be expected behavior in this case.
                 if (error == 0x07)
                 {
                     // if(_currentReadData.Offset != 0xa600fa)
-                        // Debug.LogError("Wiimote reports Read Register error 7: Attempting to read from a write-only register ("+_currentReadData.Offset.ToString("x")+").  Aborting read.");
+                    // Debug.LogError("Wiimote reports Read Register error 7: Attempting to read from a write-only register ("+_currentReadData.Offset.ToString("x")+").  Aborting read.");
 
                     _currentReadData = null;
                     return result.BytesTransferred;
                 }
+
                 // lowOffset is reversed because the Wii Remote reports are in Big Endian order
-                ushort lowOffset = BitConverter.ToUInt16(new byte[] { data[4], data[3] }, 0);
-                ushort expected = (ushort)_currentReadData.ExpectedOffset;
+                ushort lowOffset = BitConverter.ToUInt16(new byte[] {data[4], data[3]}, 0);
+                ushort expected = (ushort) _currentReadData.ExpectedOffset;
                 // if (expected != lowOffset)
-                    // Debug.LogWarning("Expected Register Read Offset (" + expected + ") does not match reported offset from Wii Remote (" + lowOffset + ")");
+                // Debug.LogWarning("Expected Register Read Offset (" + expected + ") does not match reported offset from Wii Remote (" + lowOffset + ")");
                 byte[] read = new byte[size];
                 for (int x = 0; x < size; x++)
                     read[x] = data[x + 5];
@@ -672,23 +695,23 @@ public class Wiimote
 
                 break;
             case InputDataType.AcknowledgeOutputReport:
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
                 // TODO: doesn't do any actual error handling, or do any special code about acknowledging the output report.
                 break;
             case InputDataType.ReportButtons: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
                 break;
             case InputDataType.ReportButtonsAccel: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
-                accel = new byte[] { data[0], data[1], data[2], data[3], data[4] };
+                accel = new byte[] {data[0], data[1], data[2], data[3], data[4]};
                 Accel.InterpretData(accel);
                 break;
             case InputDataType.ReportButtonsExt8: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
                 ext = new byte[8];
@@ -699,10 +722,10 @@ public class Wiimote
                     _extension.InterpretData(ext);
                 break;
             case InputDataType.ReportButtonsAccelIr12: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
-                accel = new byte[] { data[0], data[1], data[2], data[3], data[4] };
+                accel = new byte[] {data[0], data[1], data[2], data[3], data[4]};
                 Accel.InterpretData(accel);
 
                 ir = new byte[12];
@@ -711,7 +734,7 @@ public class Wiimote
                 Ir.InterpretData(ir);
                 break;
             case InputDataType.ReportButtonsExt19: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
                 ext = new byte[19];
@@ -722,10 +745,10 @@ public class Wiimote
                     _extension.InterpretData(ext);
                 break;
             case InputDataType.ReportButtonsAccelExt16: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
-                accel = new byte[] { data[0], data[1], data[2], data[3], data[4] };
+                accel = new byte[] {data[0], data[1], data[2], data[3], data[4]};
                 Accel.InterpretData(accel);
 
                 ext = new byte[16];
@@ -736,7 +759,7 @@ public class Wiimote
                     _extension.InterpretData(ext);
                 break;
             case InputDataType.ReportButtonsIr10Ext9: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
                 ir = new byte[10];
@@ -752,10 +775,10 @@ public class Wiimote
                     _extension.InterpretData(ext);
                 break;
             case InputDataType.ReportButtonsAccelIr10Ext6: // done.
-                buttons = new byte[] { data[0], data[1] };
+                buttons = new byte[] {data[0], data[1]};
                 Button.InterpretData(buttons);
 
-                accel = new byte[] { data[0], data[1], data[2], data[3], data[4] };
+                accel = new byte[] {data[0], data[1], data[2], data[3], data[4]};
                 Accel.InterpretData(accel);
 
                 ir = new byte[10];
@@ -783,20 +806,20 @@ public class Wiimote
                 {
                     _expectingSecondInterleavedPacket = true;
                     _interleavedDataBuffer = data;
-                }/* else if(WiimoteManager.Debug_Messages) {
+                } /* else if(WiimoteManager.Debug_Messages) {
                     Debug.LogWarning(
                         "Recieved two REPORT_INTERLEAVED ("+InputDataType.ReportInterleaved.ToString("x")+") reports in a row!  "
                         + "Expected REPORT_INTERLEAVED_ALT ("+InputDataType.ReportInterleavedAlt.ToString("x")+").  Ignoring!"
                     );
                 }*/
-                
+
                 break;
             case InputDataType.ReportInterleavedAlt:
                 if (_expectingSecondInterleavedPacket)
                 {
                     _expectingSecondInterleavedPacket = false;
 
-                    buttons = new byte[] { data[0], data[1] };
+                    buttons = new byte[] {data[0], data[1]};
                     Button.InterpretData(buttons);
 
                     byte[] ir1 = new byte[18];
@@ -811,6 +834,7 @@ public class Wiimote
                     Ir.InterpretDataInterleaved(ir1, ir2);
                     Accel.InterpretDataInterleaved(_interleavedDataBuffer, data);
                 }
+
                 /*else if(WiimoteManager.Debug_Messages)
                 {
                     Debug.LogWarning(
@@ -821,7 +845,7 @@ public class Wiimote
                 break;
         }
 
-        if(ext == null)
+        if (ext == null)
             RawExtension = null;
         else
             RawExtension = Array.AsReadOnly(ext);
@@ -865,9 +889,9 @@ public class Wiimote
             case InputDataType.ReportInterleavedAlt:
                 return 21;
         }
+
         return 0;
     }
-
 
     #endregion
 

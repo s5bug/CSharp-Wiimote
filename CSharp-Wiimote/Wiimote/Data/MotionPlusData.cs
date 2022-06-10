@@ -65,18 +65,20 @@ public class MotionPlusData : WiimoteData
     // shitty that I don't even care anymore.
     private const float MagicCalibrationConstant = 0.05f;
 
-    public MotionPlusData(Wiimote owner) : base(owner) { }
+    public MotionPlusData(Wiimote owner) : base(owner)
+    {
+    }
 
     public override bool InterpretData(byte[] data)
     {
         if (data.Length < 6)
             return false;
 
-        _yawSpeedRaw    = data[0];
-        _yawSpeedRaw   |= (data[3] & 0xfc) << 6;
-        _rollSpeedRaw   = data[1];
-        _rollSpeedRaw  |= (data[4] & 0xfc) << 6;
-        _pitchSpeedRaw  = data[2];
+        _yawSpeedRaw = data[0];
+        _yawSpeedRaw |= (data[3] & 0xfc) << 6;
+        _rollSpeedRaw = data[1];
+        _rollSpeedRaw |= (data[4] & 0xfc) << 6;
+        _pitchSpeedRaw = data[2];
         _pitchSpeedRaw |= (data[5] & 0xfc) << 6;
 
         YawSlow = (data[3] & 0x02) == 0x02;

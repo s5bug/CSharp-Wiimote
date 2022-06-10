@@ -14,8 +14,6 @@ public class WiimoteManager
     /// A list of all currently connected Wii Remotes.
     public static List<Wiimote> Wiimotes { get; } = new();
 
-    // ------------- RAW HIDAPI INTERFACE ------------- //
-
     /// \brief Attempts to find connected Wii Remotes, Wii Remote Pluses or Wii U Pro Controllers
     /// \return If any new remotes were found.
     public static async Task<bool> FindWiimotes(ILoggerFactory loggerFactory)
@@ -25,7 +23,7 @@ public class WiimoteManager
                 .CreateWindowsHidDeviceFactory(loggerFactory);
 
         bool wiimotesFound = await _FindWiimotes(WiimoteType.Wiimote, wiimoteFactory);
-        
+
         IDeviceFactory wiimotePlusFactory =
             new FilterDeviceDefinition(vendorId: VendorIdWiimote, productId: ProductIdWiimotePlus)
                 .CreateWindowsHidDeviceFactory(loggerFactory);
@@ -37,19 +35,20 @@ public class WiimoteManager
 
     private static async Task<bool> _FindWiimotes(WiimoteType type, IDeviceFactory factory)
     {
-        IEnumerable<ConnectedDeviceDefinition> devices = await factory.GetConnectedDeviceDefinitionsAsync().ConfigureAwait(false);
+        IEnumerable<ConnectedDeviceDefinition> devices =
+            await factory.GetConnectedDeviceDefinitionsAsync().ConfigureAwait(false);
 
         bool found = false;
-        
+
         foreach (ConnectedDeviceDefinition definition in devices)
         {
-            if(Wiimotes.Exists(connected => connected.Serial == definition.SerialNumber))
+            if (Wiimotes.Exists(connected => connected.Serial == definition.SerialNumber))
                 continue;
 
             IDevice remote = await factory.GetDeviceAsync(definition).ConfigureAwait(false);
 
             await remote.InitializeAsync().ConfigureAwait(false);
-            
+
             Wiimotes.Add(new Wiimote(type, definition.SerialNumber, remote));
         }
 
@@ -61,7 +60,7 @@ public class WiimoteManager
     public static void Cleanup(Wiimote remote)
     {
         remote.Device.Dispose();
-        
+
         Wiimotes.Remove(remote);
     }
 

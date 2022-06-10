@@ -15,7 +15,7 @@ public class RegisterReadData
 
     public byte[] Buffer { get; }
 
-    public int Offset { get;  }
+    public int Offset { get; }
 
     public int Size { get; }
 
@@ -41,5 +41,4 @@ public class RegisterReadData
 
         return true;
     }
-    
 }

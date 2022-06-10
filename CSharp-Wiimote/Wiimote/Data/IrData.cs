@@ -20,6 +20,7 @@ public class IrData : WiimoteData
     /// 
     /// \sa IRDataType, Wiimote::SetupIRCamera(IRDataType)
     public ReadOnlyCollection<int> Ir => Array.AsReadOnly(_ir);
+
     private int[] _ir;
 
     public IrData(Wiimote owner)
@@ -56,7 +57,8 @@ public class IrData : WiimoteData
         byte[] subset = new byte[9];
         int[] res;
 
-        for (int x = 0; x < 4; x++) {
+        for (int x = 0; x < 4; x++)
+        {
             int index = x * 9;
             byte[] data = index >= 18 ? data1 : data2;
             index %= 18;
@@ -75,13 +77,13 @@ public class IrData : WiimoteData
 
     private int[] InterpretDataInterleaved_Subset(byte[] data)
     {
-        if (data.Length != 9) return new int[] { -1, -1, -1, -1, -1, -1, -1, -1 };
-        if (data[0] == 0xff && data[1] == 0xff && data[2] == 0xff) return new int[] { -1, -1, -1, -1, -1, -1, -1, -1 };
+        if (data.Length != 9) return new int[] {-1, -1, -1, -1, -1, -1, -1, -1};
+        if (data[0] == 0xff && data[1] == 0xff && data[2] == 0xff) return new int[] {-1, -1, -1, -1, -1, -1, -1, -1};
 
         int x = data[0];
-        x |= ((int)(data[2] & 0x30)) << 4;
+        x |= ((int) (data[2] & 0x30)) << 4;
         int y = data[1];
-        y |= ((int)(data[2] & 0xc0)) << 2;
+        y |= ((int) (data[2] & 0xc0)) << 2;
         int size = data[2] & 0x0f;
         int xmin = data[3];
         int ymin = data[4];
@@ -89,7 +91,7 @@ public class IrData : WiimoteData
         int ymax = data[6];
         int inten = data[7];
 
-        return new int[] { x, y, size, xmin, ymin, xmax, ymax, inten };
+        return new int[] {x, y, size, xmin, ymin, xmax, ymax, inten};
     }
 
     private void InterpretIRData10(byte[] data)
@@ -112,13 +114,17 @@ public class IrData : WiimoteData
 
     private int[,] InterperetIRData10_Subset(byte[] data)
     {
-        if (data.Length != 5) return new int[,] {{-1, -1, -1, -1, -1, -1, -1, -1},
-            {-1, -1, -1, -1, -1, -1, -1, -1}};
+        if (data.Length != 5)
+            return new int[,]
+            {
+                {-1, -1, -1, -1, -1, -1, -1, -1},
+                {-1, -1, -1, -1, -1, -1, -1, -1}
+            };
 
         int x1 = data[0];
-        x1 |= ((int)(data[2] & 0x30)) << 4;
+        x1 |= ((int) (data[2] & 0x30)) << 4;
         int y1 = data[1];
-        y1 |= ((int)(data[2] & 0xc0)) << 2;
+        y1 |= ((int) (data[2] & 0xc0)) << 2;
 
         if (data[0] == 0xff && data[1] == 0xff && (data[2] & 0xf0) == 0xf0)
         {
@@ -127,9 +133,9 @@ public class IrData : WiimoteData
         }
 
         int x2 = data[3];
-        x2 |= ((int)(data[2] & 0x03)) << 8;
+        x2 |= ((int) (data[2] & 0x03)) << 8;
         int y2 = data[4];
-        y2 |= ((int)(data[2] & 0x0c)) << 6;
+        y2 |= ((int) (data[2] & 0x0c)) << 6;
 
         if (data[3] == 0xff && data[4] == 0xff && (data[2] & 0x0f) == 0x0f)
         {
@@ -137,8 +143,11 @@ public class IrData : WiimoteData
             y2 = -1;
         }
 
-        return new int[,] { { x1, y1, -1, -1, -1, -1, -1, -1 },
-            { x2, y2, -1, -1, -1, -1, -1, -1 }};
+        return new int[,]
+        {
+            {x1, y1, -1, -1, -1, -1, -1, -1},
+            {x2, y2, -1, -1, -1, -1, -1, -1}
+        };
     }
 
     private void InterpretIRData12(byte[] data)
@@ -147,7 +156,7 @@ public class IrData : WiimoteData
         for (int x = 0; x < 4; x++)
         {
             int i = x * 3; // starting index of data
-            byte[] subset = new byte[] { data[i], data[i + 1], data[i + 2] };
+            byte[] subset = new byte[] {data[i], data[i + 1], data[i + 2]};
             int[] calc = InterpretIRData12_Subset(subset);
 
             for (int y = 0; y < 8; y++)
@@ -157,16 +166,16 @@ public class IrData : WiimoteData
 
     private int[] InterpretIRData12_Subset(byte[] data)
     {
-        if (data.Length != 3) return new int[] { -1, -1, -1, -1, -1, -1, -1, -1 };
-        if (data[0] == 0xff && data[1] == 0xff && data[2] == 0xff) return new int[] { -1, -1, -1, -1, -1, -1, -1, -1 };
+        if (data.Length != 3) return new int[] {-1, -1, -1, -1, -1, -1, -1, -1};
+        if (data[0] == 0xff && data[1] == 0xff && data[2] == 0xff) return new int[] {-1, -1, -1, -1, -1, -1, -1, -1};
 
         int x = data[0];
-        x |= ((int)(data[2] & 0x30)) << 4;
+        x |= ((int) (data[2] & 0x30)) << 4;
         int y = data[1];
-        y |= ((int)(data[2] & 0xc0)) << 2;
+        y |= ((int) (data[2] & 0xc0)) << 2;
         int size = data[2] & 0x0f;
 
-        return new int[] { x, y, size, -1, -1, -1, -1, -1 };
+        return new int[] {x, y, size, -1, -1, -1, -1, -1};
     }
 
     /// \brief Size: 2.  Returns the position at which the Wii Remote is pointing to.  This is a value from 0-1
@@ -179,7 +188,7 @@ public class IrData : WiimoteData
         float[] ret = new float[2];
         float[] midpoint = GetIRMidpoint();
         if (midpoint[0] < 0 || midpoint[1] < 0)
-            return new float[] { -1, -1 };
+            return new float[] {-1, -1};
         midpoint[0] = 1 - midpoint[0] - 0.5f;
         midpoint[1] = midpoint[1] - 0.5f;
 
@@ -214,8 +223,8 @@ public class IrData : WiimoteData
         return ret;
     }
 
-    private float[] LastIRSeparation = new float[] { 0, 0 };
-    private int[] SensorBarIndices = new int[] { -1, -1 };
+    private float[] LastIRSeparation = new float[] {0, 0};
+    private int[] SensorBarIndices = new int[] {-1, -1};
 
     /// \brief Attempts to identify which of the four IR "dots" reported by the Wii Remote are from the Wii sensor bar.
     /// \param predict If true, and one of the dots is outside of the Wii Remote's field of view,
@@ -230,13 +239,19 @@ public class IrData : WiimoteData
         // If necessary, change the current "sensor bar" IR indices to new ones.  This happens if one of the dots went out of focus and a new one took its place.
         // We do this because the Wii Remote reports "consistent" IR dot indices - that is, it tracks the IR dots and doesn't change their index in the IR report.
         // This way we can rule out extraneous dots that pop in and out randomly as they aren't being tracked.
-        for (int x = 0; x < 2; x++) {
-            if (SensorBarIndices[x] == -1 || _ir[(SensorBarIndices[x] * 8) + 0] == -1) {
+        for (int x = 0; x < 2; x++)
+        {
+            if (SensorBarIndices[x] == -1 || _ir[(SensorBarIndices[x] * 8) + 0] == -1)
+            {
                 SensorBarIndices[x] = -1;
-                for (int y = 0; y < 4; y++) {
-                    if (SensorBarIndices[(x + 1) % 2] == y) continue; // If the other sensor bar index is this one, ignore it.
+                for (int y = 0; y < 4; y++)
+                {
+                    if (SensorBarIndices[(x + 1) % 2] == y)
+                        continue; // If the other sensor bar index is this one, ignore it.
 
-                    if (_ir[(y * 8) + 0] != -1) { // If this index is valid, use it.
+                    if (_ir[(y * 8) + 0] != -1)
+                    {
+                        // If this index is valid, use it.
                         SensorBarIndices[x] = y;
                         y = 4; // end loop
                     }
@@ -273,7 +288,10 @@ public class IrData : WiimoteData
             LastIRSeparation[1] = ret[1, 1] - ret[0, 1];
 
             return ret;
-        } else if (predict && SensorBarIndices[0] != -1) // We have enought data to predict (1 dot) and predicting was requested
+        }
+        else if
+            (predict && SensorBarIndices[0] !=
+             -1) // We have enought data to predict (1 dot) and predicting was requested
         {
             float[,] ret = new float[2, 3];
             ret[0, 0] = _ir[(SensorBarIndices[0] * 8) + 0];
@@ -285,12 +303,13 @@ public class IrData : WiimoteData
             ret[1, 2] = -1;
 
             return ret;
-        } else // We don't have enough data
+        }
+        else // We don't have enough data
         {
             LastIRSeparation[0] = 0;
             LastIRSeparation[1] = 0;
 
-            return new float[,] { { -1, -1, -1 }, { -1, -1, -1 } };
+            return new float[,] {{-1, -1, -1}, {-1, -1, -1}};
         }
     }
 }

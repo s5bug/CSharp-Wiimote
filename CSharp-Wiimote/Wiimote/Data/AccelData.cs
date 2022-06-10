@@ -24,8 +24,9 @@ public class AccelData : WiimoteData
     /// Forward/Backward: -Y/+Y\n
     /// </remarks>
     public ReadOnlyCollection<int> Accel => Array.AsReadOnly(_accel);
+
     private readonly int[] _accel;
-    
+
     /// <summary>
     /// Size: 3x3. Calibration data for the accelerometer. This is not reported
     /// by the Wii Remote directly - it is instead collected from normal
@@ -45,10 +46,11 @@ public class AccelData : WiimoteData
     /// <remarks>
     /// int[calibration step,calibration data] (size 3x3)
     /// </remarks>
-    public readonly int[,] AccelCalib = {
-        { 479, 478, 569 },
-        { 472, 568, 476 },
-        { 569, 469, 476 }
+    public readonly int[,] AccelCalib =
+    {
+        {479, 478, 569},
+        {472, 568, 476},
+        {569, 469, 476}
     };
 
     public AccelData(Wiimote owner)
@@ -68,7 +70,7 @@ public class AccelData : WiimoteData
         _accel[2] = (data[4] << 2) | ((data[1] >> 6) & 0x01);
 
         //for (int x = 0; x < 3; x++) _accel[x] -= 0x200; // center around zero.
-            
+
         return true;
     }
 
@@ -84,10 +86,10 @@ public class AccelData : WiimoteData
 
         _accel[0] = data1[2] << 2;
         _accel[1] = data2[2] << 2;
-        _accel[2] =   (((data1[0] & 0x60) >> 1) | 
-                       ((data1[1] & 0x60) << 1) | 
-                       ((data2[0] & 0x60) >> 5) | 
-                       ((data2[1] & 0x60) >> 3)) << 2;
+        _accel[2] = (((data1[0] & 0x60) >> 1) |
+                     ((data1[1] & 0x60) << 1) |
+                     ((data2[0] & 0x60) >> 5) |
+                     ((data2[1] & 0x60) >> 3)) << 2;
 
         //for (int x = 0; x < 3; x++) _accel[x] -= 0x200; // center around zero.
 
@@ -101,7 +103,7 @@ public class AccelData : WiimoteData
     public void CalibrateAccel(AccelCalibrationStep step)
     {
         for (int x = 0; x < 3; x++)
-            AccelCalib[(int)step, x] = Accel[x];
+            AccelCalib[(int) step, x] = Accel[x];
     }
 
     public float[] GetAccelZeroPoints()
@@ -109,9 +111,9 @@ public class AccelData : WiimoteData
         float[] ret = new float[3];
         // For each axis, find the two steps that are not affected by gravity on that axis.
         // average these values together to get a final zero point.
-        ret[0] = ((float)AccelCalib[0, 0] + (float)AccelCalib[1, 0]) / 2f;
-        ret[1] = ((float)AccelCalib[0, 1] + (float)AccelCalib[2, 1]) / 2f;
-        ret[2] = ((float)AccelCalib[1, 2] + (float)AccelCalib[2, 2]) / 2f;
+        ret[0] = ((float) AccelCalib[0, 0] + (float) AccelCalib[1, 0]) / 2f;
+        ret[1] = ((float) AccelCalib[0, 1] + (float) AccelCalib[2, 1]) / 2f;
+        ret[2] = ((float) AccelCalib[1, 2] + (float) AccelCalib[2, 2]) / 2f;
         return ret;
     }
 

@@ -35,7 +35,9 @@ public class ButtonData : WiimoteData
     /// Button: Home
     public bool Home { get; private set; }
 
-    public ButtonData(Wiimote owner) : base(owner) { }
+    public ButtonData(Wiimote owner) : base(owner)
+    {
+    }
 
     public override bool InterpretData(byte[] data)
     {
